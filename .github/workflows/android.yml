@@ -60,12 +60,12 @@ jobs:
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
           hash -r
           
-          yes | sdkmanager --licenses >/dev/null || true
+          yes | sdkmanager --licenses
           sdkmanager \
           "platform-tools" \
           "platforms;android-33" \
           "build-tools;33.0.2" \
-          "build-tools;36.0.0"
+          "build-tools;36.1.0"
    
       - name: Install buildozer
         run: |
