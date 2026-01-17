@@ -59,8 +59,10 @@ jobs:
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
           hash -r
 
-          yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses || true
-          sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          SDKMANAGER=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
+          yes | $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT --licenses || true
+          $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT --list | head -n 30 || true
+          $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT \
             "platform-tools" \
             "platforms;android-33" \
             "build-tools;33.0.2" \
@@ -75,11 +77,19 @@ jobs:
         run: |
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export ANDROID_HOME=$ANDROID_SDK_ROOT
-          buildozer -v android debug
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
+          # buildozer가 예전에 만든 내부 SDK 캐시 제거
+          rm -rf .buildozer
+
+          # buildozer에게 "이 SDK를 써라" 강제
+          buildozer -v android debug --sdk_dir $ANDROID_SDK_ROOT
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: bin/*.apk
+          path: |
+            bin/*.apk
+            **/bin/*.apk
+
