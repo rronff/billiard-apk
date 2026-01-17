@@ -1,5 +1,6 @@
 [app]
 title = BilliardScoreboard
+version = 0.1
 package.name = billiardscore
 package.domain = org.example
 
