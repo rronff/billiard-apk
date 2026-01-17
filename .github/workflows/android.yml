@@ -61,8 +61,11 @@ jobs:
           hash -r
           
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-
+          sdkmanager \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.2" \
+          "build-tools;36.0.0"
    
       - name: Install buildozer
         run: |
