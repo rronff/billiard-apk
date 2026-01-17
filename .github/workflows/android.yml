@@ -17,18 +17,29 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Install system deps
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential git zip unzip openjdk-17-jdk \
+            build-essential git zip unzip \
             autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev \
             libffi-dev libssl-dev
 
       - name: Install Android SDK and accept licenses
         run: |
+
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          
           export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           cd $ANDROID_SDK_ROOT/cmdline-tools
 
@@ -38,13 +49,18 @@ jobs:
           # unzip 결과가 cmdline-tools/ 로 나오므로 latest로 정리
           rm -rf latest
           mkdir -p latest
-          mv cmdline-tools/* latest/
-          rm -rf cmdline-tools cmdline-tools.zip
+          if [ -d "cmdline-tools" ]; then
+            mv cmdline-tools/* latest/
+            rm -rf cmdline-tools
+          else
+            find . -maxdepth 1 -mindepth 1 ! -name latest ! -name cmdline-tools.zip -exec mv -t latest {} +
+          fi
+          rm -f cmdline-tools.zip
 
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
           hash -r
           
-          yes | sdkmanager --licenses
+          yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
    
