@@ -60,30 +60,31 @@ jobs:
           hash -r
 
           SDKMANAGER=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
-          yes | $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT --licenses || true
-          $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT --list | head -n 30 || true
-          $SDKMANAGER --sdk_root=$ANDROID_SDK_ROOT \
+          yes | $SDKMANAGER --licenses || true
+          $SDKMANAGER --list | head -n 30 || true
+          $SDKMANAGER \
             "platform-tools" \
             "platforms;android-33" \
             "build-tools;33.0.2" \
             "build-tools;36.1.0"
-   
+
       - name: Install buildozer
         run: |
           python -m pip install --upgrade pip
           pip install buildozer "Cython<3"
 
       - name: Build debug APK
+        env:
+          ANDROID_SDK_ROOT: /home/runner/android-sdk
+          ANDROID_HOME: /home/runner/android-sdk
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export ANDROID_HOME=$ANDROID_SDK_ROOT
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-
-          # buildozer가 예전에 만든 내부 SDK 캐시 제거
+          rm -rf ~/.buildozer
           rm -rf .buildozer
 
-          # buildozer에게 "이 SDK를 써라" 강제
-          buildozer -v android debug --sdk_dir $ANDROID_SDK_ROOT
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+          hash -r
+
+          buildozer -v android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -92,4 +93,3 @@ jobs:
           path: |
             bin/*.apk
             **/bin/*.apk
-
